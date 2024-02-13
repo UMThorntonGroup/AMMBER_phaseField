@@ -79,9 +79,9 @@ std::vector<nucleus<dim> > MatrixFreePDE<dim,degree>::getNewNuclei(){
 
     // Final check to resolve overlap conflicts with existing precipitates
     std::vector<unsigned int> conflict_ids;
-    safetyCheckNewNuclei(newnuclei, conflict_ids);
+    // safetyCheckNewNuclei(newnuclei, conflict_ids);
 
-    newnuclei = new_nuclei_parallel.removeSubsetOfNuclei(conflict_ids, nuclei.size());
+    // newnuclei = new_nuclei_parallel.removeSubsetOfNuclei(conflict_ids, nuclei.size());
 
     return newnuclei;
 }
