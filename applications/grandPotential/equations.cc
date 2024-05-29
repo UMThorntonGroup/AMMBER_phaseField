@@ -14,7 +14,7 @@
 // rate calculations.
 
 void variableAttributeLoader::loadVariableAttributes(){
-    const unsigned int num_ops{3};
+    const unsigned int num_ops{2};
     const unsigned int num_muFields{2};
     std::string string_valn = "";
     std::string string_valdndt = "";
@@ -128,10 +128,12 @@ std::vector<scalargradType> dmudtGrad(num_muFields);
 
 for (unsigned int i=0; i<num_muFields; ++i){
     scalarvalueType susceptibility = 0.0;
+    dmudtGrad[i] *= 0;
     for (unsigned int j=0; j<num_phases; ++j){
         susceptibility += h[j]/(Va*Va*kWell[j][i]);
+        dmudtGrad[i] -= h[j]*D[j]*mu_gradients[i];
     }
-    dmudtGrad[i] = -M*mu_gradients[i]/susceptibility;
+    //dmudtGrad[i] = -D*mu_gradients[i]; //(D*susceptibility)*mu_gradients[i]/susceptibility
     dmudtValue[i] = 0.0;
     for (unsigned int k=0; k<num_phases; ++k){
         for (unsigned int j=0; j<num_ops; ++j){
@@ -192,7 +194,7 @@ for (unsigned int i=0; i<num_phases; ++i){
     omegaC[i] = fWell[i];
     for (unsigned int j=0; j<num_muFields; ++j){
         omegaC[i] += -0.5*mu_values[j]*mu_values[j]/constV(Va*Va*kWell[i][j])
-            + mu_values[j]*cmin[i][j]/Va;
+            - mu_values[j]*cmin[i][j]/Va;
     }
 }
 
