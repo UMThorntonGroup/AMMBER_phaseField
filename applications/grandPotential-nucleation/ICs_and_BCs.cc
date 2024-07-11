@@ -14,29 +14,51 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
     // Precalculating everything makes writing initial conditions easier. May take slightly more runtime.
     std::vector<double> op_vals(num_ops, 0.0);
     std::vector<double> mu_vals(num_muFields, 0.0);
+    std::vector<double> h(num_ops, 0.0);
 
+    // Custom coordinate system
+    double center[3] = {0.5*userInputs.domain_size[0],0.5*userInputs.domain_size[1],0.0*userInputs.domain_size[2]};
+    double x = p[0] - center[0];
+    double y = p[1] - center[1];
+    double z;
+    if(dim<3){
+      z = 0.0;
+    } else {
+      z = p[2] - center[2];
+    }
+    double r2 = x*x+y*y+z*z;
 
-    // double center[3] = {5.0,5.0,5.0};
-    // double rad = 1.0;
-    // double xwidth = 2.5;
-    // double dist2 = 0.0;
-    // double dist = 0.0;
-    // double xdist = p[0]-center[0];
-    // for(unsigned int xyz = 0; xyz<dim; xyz++){
-    //     dist2 += (p[xyz]-center[xyz])*(p[xyz]-center[xyz]);
-    // }
-    // dist = std::sqrt(dist2);
-    // double tanh_profile = 0.5*(1+std::tanh(-2.0*(dist-rad)));
-    // double tanh_profileB= 0.5*(1+std::tanh(-2.0*(std::abs(xdist)-xwidth)));
-
-
+    // constant definitions
+    double pi = 3.141592653589793238;
+    double intf = std::sqrt(0.5*m0/kappa);
+    std::vector<std::vector<double>> c0  = reshapeVector(userInputs.get_model_constant_double_array("c0"),
+                                                                  num_phases, num_muFields);
+    
+    // TODO: make order parameters
     op_vals[0] = 1.0;//liquid
-    //mu_vals[0] = 12.0;//component 0
-    for(unsigned int mu_index = 0; mu_index<num_muFields; ++mu_index){
-        mu_vals[0] = kWell[0][mu_index]*(c0[mu_index]-cmin[0][mu_index]);
+
+    // Interpolation fields
+    double sum_nsq = 0;
+    for(unsigned int op_index = 0; op_index<num_ops; ++op_index){
+        sum_nsq += op_vals[op_index]*op_vals[op_index];
+    }
+    for(unsigned int op_index = 0; op_index<num_ops; ++op_index){
+        h[op_index] = op_vals[op_index]*op_vals[op_index]/sum_nsq;
     }
 
+    // make mu fields
+    for(unsigned int mu_index = 0; mu_index<num_muFields; ++mu_index){
+        for(unsigned int op_index = 0; op_index<num_ops; ++op_index){
+            mu_vals[mu_index] += h[op_index]
+                                *Va*kWell[phase_index[op_index]][mu_index]
+                                *(c0[phase_index[op_index]][mu_index]
+                                    -cmin[phase_index[op_index]][mu_index]);
+        }
+    }
+
+    // ===========================================================================
     // Submit fields
+    // ===========================================================================
     scalar_IC = 0.0;
     for(unsigned int op_index = 0; op_index<num_ops; ++op_index){
         if(index==op_index){scalar_IC = op_vals[op_index];}

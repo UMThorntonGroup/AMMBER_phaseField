@@ -8,15 +8,23 @@ class customPDE: public MatrixFreePDE<dim,degree>
 public:
     // Constructor
     customPDE(userInputParameters<dim> _userInputs): MatrixFreePDE<dim,degree>(_userInputs) , userInputs(_userInputs) {
-    //Defining seed
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    //Initializing distribution
-    dist = distribution(0.0,1.0);
-    //Initializing random variable
-    rng = engine(seed);
+        //Constructed variables & non-dimensionalization
+        divideByX(fWell, Va*m0_dim);
+        for(uint i=0;i<kWell.size(); ++i){
+            divideByX(kWell[i], Va*m0_dim);
+        }
+        divideByX(D, l0*l0);
+        k2 = k2/m0_dim;
+        k1 = k1*l0*l0;
+        //Nucleation
+        set_nucleation_params();
+        //Defining seed
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        //Initializing distribution
+        dist = distribution(0.0,1.0);
+        //Initializing random variable
+        rng = engine(seed);
 
-    //Model specific calls
-    set_nucleation_params();
     };
 
     // Function to set the initial conditions (in ICs_and_BCs.h)
@@ -127,7 +135,11 @@ private:
         }
         return phase_id_by_name;
     }
-    
+    void divideByX(std::vector<double> &vec, double X){
+        for(uint i=0; i<vec.size(); ++i){
+            vec[i] /= X;
+        }
+    }
     void set_nucleation_params(){
         if(!boost::iequals(nuc_phase, "NONE")){
             std::vector<std::string>::iterator nuc_phase_it = std::find(phase_names.begin(), phase_names.end(), nuc_phase);
@@ -159,22 +171,25 @@ private:
         unsigned int num_comps  = userInputs.get_model_constant_int("num_comps");
         unsigned int num_muFields = num_comps-1;
         unsigned int num_ops = userInputs.get_model_constant_int("num_ops");
-        std::vector<int> phase_index = get_phase_index(num_phases, num_ops); // phase index of order parameter i
-        std::vector<std::string> phase_names = userInputs.get_model_constant_string_array("phase_names");
-        std::unordered_map<std::string, unsigned int> index_of_phase = make_string_uint_map(phase_names, num_phases);
 
-        const std::vector<double> fWell = userInputs.get_model_constant_double_array("fWell");
+        std::vector<double> fWell = userInputs.get_model_constant_double_array("fWell");
         // These variable are read in linearly, but neet to be 2D vectors of shape [num_phases][num_comps-1] 
-        const std::vector<std::vector<double>> kWell = reshapeVector(userInputs.get_model_constant_double_array("kWell"),
-                                                                        num_phases, num_muFields);
-        const std::vector<std::vector<double>> cmin  = reshapeVector(userInputs.get_model_constant_double_array("cmin"),
-                                                                        num_phases, num_muFields);
-        const double L      = userInputs.get_model_constant_double("L");
-        const double m0     = userInputs.get_model_constant_double("m0");
-        const double kappa  = userInputs.get_model_constant_double("kappa");
-        const double gamma  = userInputs.get_model_constant_double("gamma");
-        const double M      = userInputs.get_model_constant_double("M");
-        const double Va     = userInputs.get_model_constant_double("Va");
+        std::vector<std::vector<double>> kWell = reshapeVector(userInputs.get_model_constant_double_array("kWell"),
+                                                                  num_phases, num_muFields);
+        std::vector<std::vector<double>> cmin  = reshapeVector(userInputs.get_model_constant_double_array("cmin"),
+                                                                  num_phases, num_muFields);
+        double Va     = userInputs.get_model_constant_double("Va");
+        double L      = userInputs.get_model_constant_double("L");
+        double l0     = userInputs.get_model_constant_double("l0");
+        double l_gb   = userInputs.get_model_constant_double("l_gb");
+        double sigma  = userInputs.get_model_constant_double("sigma");
+        double m0_dim = 6.0*sigma/l_gb;
+        double m0     = 1.0;
+        double kappa  = (1.0/8.0)*(l_gb*l_gb)/(l0*l0);
+        double gamma  = userInputs.get_model_constant_double("gamma");
+        std::vector<double> D = userInputs.get_model_constant_double_array("D");
+        std::vector<int> phase_index = get_phase_index(num_phases, num_ops);
+
         const std::string nuc_phase = userInputs.get_model_constant_string("nuc_phase");
         double k1 = 0;
         double k2 = 0;
@@ -184,9 +199,8 @@ private:
         std::vector<double> c0 = userInputs.get_model_constant_double_array("c0");
         // std::vector<bool> allowed_to_nucleate = std::vector<bool>(num_phases, false);
         // std::vector<bool> allowed_to_nucleate = userInputs.get_model_constant_bool_array("allowed_to_nucleate");
-
         // std::unordered_map<unsigned int, std::vector<unsigned int>> ops_of_phase;
-        // std::vector<std::string> phase_names = userInputs.get_model_constant_string_array("phase_names");
+        std::vector<std::string> phase_names = userInputs.get_model_constant_string_array("phase_names");
 
         //Declaring random number generator (Type std::mt19937_64)
          engine rng;

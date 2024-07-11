@@ -87,7 +87,7 @@ end
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 2.5e-6
+set Time step = 1.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
@@ -118,13 +118,13 @@ set Number of time steps = 200000
 set Boundary condition for variable n0 =  PERIODIC
 set Boundary condition for variable n1 =  PERIODIC
 set Boundary condition for variable n2 =  PERIODIC
-#set Boundary condition for variable n3 =  PERIODIC
+
 set Boundary condition for variable dndt0 =  PERIODIC
 set Boundary condition for variable dndt1 =  PERIODIC
 set Boundary condition for variable dndt2 =  PERIODIC
-#set Boundary condition for variable dndt3 =  PERIODIC
+
 set Boundary condition for variable mu0 =  PERIODIC
-#set Boundary condition for variable mu1 =  PERIODIC
+
 
 # =================================================================================
 # Set the output parameters
@@ -210,25 +210,26 @@ set Model constant cmin = 0.50,  0.95,  0.05,  DOUBLE ARRAY
 # Grain Mobility
 set Model constant L = 10.0, DOUBLE
 
-# Energy scale
-set Model constant m0 = 8.0, DOUBLE
-
-# Gradient Penalty
-set Model constant kappa = 0.01, DOUBLE
-
 # Interface term
 set Model constant gamma = 1.5, DOUBLE
 
+# Interface width (m)
+set Model constant l_gb = 0.1, DOUBLE
+
+# Interface energy (J/m^3)
+set Model constant sigma = 0.666, DOUBLE
+
+# Length scale (m)
+set Model constant l0 = 1.0, DOUBLE
+
 # Component Mobility
-set Model constant M = 0.03, DOUBLE
+set Model constant D = 0.03, 0.03, 0.03, DOUBLE ARRAY
 
 # Volume Scale
 set Model constant Va = 1.0, DOUBLE
 
-# =================================================================================
-# Set homogenous concentration IC
-# =================================================================================
-set Model constant c0 = 0.50, DOUBLE ARRAY
+# Initial Compositions
+set Model constant c0 = 0.50, 0.0, 0.0, DOUBLE ARRAY
 
 # =================================================================================
 # Set nucleation parameters
@@ -242,24 +243,24 @@ set Model constant nuc_phase = ALPHA, STRING
 set Model constant k1 = 50000.0, DOUBLE
 
 # Nucleation constant 2
-set Model constant k2 = 60.0, DOUBLE
+set Model constant k2 = 2.8, DOUBLE
 
 # Incubation time before nucleation
 set Model constant tau = 0.1, DOUBLE
 
 # Nucleation force
-set Model constant nuc_force = 50.0, DOUBLE
+set Model constant nuc_force = 500.0, DOUBLE
 
 # =================================================================================
 # Set the nucleation parameters
 # =================================================================================
 
-set Time steps between nucleation attempts = 5
+set Time steps between nucleation attempts = 50
 set Minimum allowed distance between nuclei = 1
 set Order parameter cutoff value = 0.5
 
 subsection Nucleation parameters: n1
-    set Nucleus semiaxes (x, y, z) = 0.06, 0.06, 0.06
+    set Nucleus semiaxes (x, y, z) = 0.09, 0.09, 0.09
     set Freeze zone semiaxes (x, y, z) = 0.4, 0.4, 0.4
     set Nucleus rotation in degrees (x, y, z) = 0, 0, 0
     set Freeze time following nucleation = 0.002
@@ -267,7 +268,7 @@ subsection Nucleation parameters: n1
 end
 
 subsection Nucleation parameters: n2
-    set Nucleus semiaxes (x, y, z) = 0.06, 0.06, 0.06
+    set Nucleus semiaxes (x, y, z) = 0.09, 0.09, 0.09
     set Freeze zone semiaxes (x, y, z) = 0.4, 0.4, 0.4
     set Nucleus rotation in degrees (x, y, z) = 0, 0, 0
     set Freeze time following nucleation = 0.002

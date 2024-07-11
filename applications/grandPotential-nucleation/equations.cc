@@ -132,10 +132,12 @@ std::vector<scalargradType> dmudtGrad(num_muFields);
 
 for (unsigned int i=0; i<num_muFields; ++i){
     scalarvalueType susceptibility = 0.0;
+    dmudtGrad[i] *= 0;
     for (unsigned int j=0; j<num_phases; ++j){
         susceptibility += h[j]/(Va*Va*kWell[j][i]);
+        dmudtGrad[i] -= h[j]*D[j]*mu_gradients[i];
     }
-    dmudtGrad[i] = -M*mu_gradients[i]/susceptibility;
+    //dmudtGrad[i] = -D*mu_gradients[i]; //(D*susceptibility)*mu_gradients[i]/susceptibility
     dmudtValue[i] = 0.0;
     for (unsigned int k=0; k<num_phases; ++k){
         for (unsigned int j=0; j<num_ops; ++j){
@@ -147,8 +149,7 @@ for (unsigned int i=0; i<num_muFields; ++i){
 
 for (unsigned int i=0; i<num_ops; ++i){
     variable_list.set_scalar_value_term_RHS(i,eta_values[i] +
-        (dndt_values[i]/*+constV(forcingTerm[i])*/)*userInputs.dtValue);
-    //variable_list.set_scalar_gradient_term_RHS(i,dmudtGrad[i]*constV(0.0));
+        dndt_values[i]*userInputs.dtValue);
 }
 for (unsigned int i=0; i<num_muFields; ++i){
     variable_list.set_scalar_value_term_RHS(i+num_ops,mu_values[i] +
@@ -227,7 +228,7 @@ for (unsigned int i=0; i < num_ops; ++i){
     //variable_list.set_scalar_value_term_RHS(i+num_ops+num_muFields,-L*(dndtValue[i])*mob_term[i]+forcingTerm[i]);
     //variable_list.set_scalar_gradient_term_RHS(i+num_ops+num_muFields,-L*(dndtGrad[i])*mob_term[i]);
     variable_list.set_scalar_value_term_RHS(i+num_ops+num_muFields,-L*(dndtValue[i]-nuc_force*forcingTerm[i]));
-    variable_list.set_scalar_gradient_term_RHS(i+num_ops+num_muFields,-L*(dndtGrad[i]));
+    variable_list.set_scalar_gradient_term_RHS(i+num_ops+num_muFields,-L*(dndtGrad[i]*mob_term[i]));
 }
 
 }
