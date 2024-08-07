@@ -27,7 +27,7 @@ double customPDE<dim,degree>::getNucleationProbability(variableValueContainer va
         // mu = std::max(std::min(mu, mu_max), mu_min);
         double mu_nuc = std::max(std::min(mu, mu_max), mu_min); //note to future xander, some need mu, some need this.
         //std::cout << "munuc:" << mu_nuc << " ";
-        c_nuc[mu_index] = cmin[nuc_index][mu_index]+mu_nuc/kWell[nuc_index][mu_index];
+        c_nuc[mu_index] = cmin[nuc_index][mu_index]+mu_nuc/(Va*kWell[nuc_index][mu_index]);
         //std::cout << "cnuc:" << c_nuc[mu_index] << " ";
         //c_nuc[mu_index] = std::max(std::min(c_nuc[mu_index], 1.0), 0.0);
         for (unsigned int op_index = 0; op_index<num_ops; op_index++){
@@ -36,7 +36,7 @@ double customPDE<dim,degree>::getNucleationProbability(variableValueContainer va
             //std::cout << "cmin:" << cmin[phase_index[op_index]][mu_index] << " ";
             //std::cout << "mu:" << mu << " ";
         }
-        G_nuc += mu_nuc*(c_nuc[mu_index]-cmin[nuc_index][mu_index])/2.0;
+        G_nuc += mu_nuc*(c_nuc[mu_index]-cmin[nuc_index][mu_index])/(2.0*Va);
         //std::cout << "G: " << G_nuc << " ";
     }
     // std::cout << "G" << variable_index << ": " << G_nuc << " ";
@@ -52,7 +52,7 @@ double customPDE<dim,degree>::getNucleationProbability(variableValueContainer va
             //std::cout << "vv:" << variable_value(op_index) << " ";
             //std::cout << "ss:" << sum_op_sq << " ";
             g += 0.5*kWell[phase_index[op_index]][mu_index]*(c[mu_index]-cmin[phase_index[op_index]][mu_index])*(c[mu_index]-cmin[phase_index[op_index]][mu_index]);
-            g += (mu*(c_nuc[mu_index]-c[mu_index]));
+            g += (mu*(c_nuc[mu_index]-c[mu_index])/Va);
         }
         G_nuc += h*g;
     }
