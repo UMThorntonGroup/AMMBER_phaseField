@@ -249,7 +249,7 @@ set Model constant nuc_phase = ALPHA, STRING
 set Model constant k1 = 50000.0, DOUBLE
 
 # Nucleation constant 2
-set Model constant k2 = 2.8, DOUBLE
+set Model constant k2 = 96.0, DOUBLE
 
 # Incubation time before nucleation
 set Model constant tau = 0.1, DOUBLE
