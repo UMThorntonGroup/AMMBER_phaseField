@@ -9,15 +9,40 @@ public:
     // Constructor
     customPDE(userInputParameters<dim> _userInputs): MatrixFreePDE<dim,degree>(_userInputs) , userInputs(_userInputs) {
         //Constructed variables & non-dimensionalization
-        divideByX(fWell, Va*m0_dim);
+        sigma *= 1.0/(l0*E0);
+        l_gb *= 1.0/l0;
+        Va *= 1.0/(l0*l0*l0);
+        L *= E0*tau0;
+        vecTimesX(D,tau0/(l0*l0));
+
+        m0 = 6.0*sigma/l_gb;
+        kappa = 0.75*sigma*l_gb;
+
+        vecTimesX(fWell, 1.0/(l0*l0*l0*Va*E0));
         for(uint i=0;i<kWell.size(); ++i){
-            divideByX(kWell[i], Va*m0_dim);
+            vecTimesX(kWell[i], 1.0/(l0*l0*l0*Va*E0));
         }
-        divideByX(D, l0*l0);
-        k2 = k2/m0_dim;
-        k1 = k1*l0*l0;
-        //Nucleation
+        
         set_nucleation_params();
+        k1 *= tau0;
+        for(int i=0;i<dim;++i){k1 *= l0;}
+        k2 *= 1.0/E0;
+
+        if(true){
+            std::cout
+                << "sigma: " << sigma << "\n" 
+                << "l_gb: " << l_gb << "\n" 
+                << "Va: " << Va << "\n" 
+                << "L: " << L << "\n" 
+                << "D[0]: " << D[0] << "\n" 
+                << "m0: " << m0  << "\n" 
+                << "kappa: " << kappa << "\n" 
+                << "fWell[0]: " << fWell[0] <<  "\n"
+                << "kWell[0][0]: " << kWell[0][ 0] << "\n"
+                << "k1: " << k1 << "\n" 
+                << "k2: " << k2 << "\n";
+        }
+        
         //Defining seed
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         //Initializing distribution
@@ -135,9 +160,9 @@ private:
         }
         return phase_id_by_name;
     }
-    void divideByX(std::vector<double> &vec, double X){
+    void vecTimesX(std::vector<double> &vec, double X){
         for(uint i=0; i<vec.size(); ++i){
-            vec[i] /= X;
+            vec[i] *= X;
         }
     }
     void set_nucleation_params(){
@@ -151,7 +176,6 @@ private:
                 using_nucleation = true;
                 k1 = userInputs.get_model_constant_double("k1");
                 k2 = userInputs.get_model_constant_double("k2");
-                tau = userInputs.get_model_constant_double("tau");
                 nuc_force = userInputs.get_model_constant_double("nuc_force");
             }
         }
@@ -171,41 +195,48 @@ private:
         unsigned int num_comps  = userInputs.get_model_constant_int("num_comps");
         unsigned int num_muFields = num_comps-1;
         unsigned int num_ops = userInputs.get_model_constant_int("num_ops");
+        std::vector<std::string> phase_names = userInputs.get_model_constant_string_array("phase_names");
+        std::vector<int> phase_index = get_phase_index(num_phases, num_ops);
 
+        // Values for non-dimensionalization
+        double l0 = userInputs.get_model_constant_double("l0");
+        double E0 = userInputs.get_model_constant_double("E0");
+        double tau0 = userInputs.get_model_constant_double("tau0");
+        
+        // Phase Parameters
         std::vector<double> fWell = userInputs.get_model_constant_double_array("fWell");
-        // These variable are read in linearly, but neet to be 2D vectors of shape [num_phases][num_comps-1] 
+                                                // 2D vectors of shape [num_phases][num_comps-1]
         std::vector<std::vector<double>> kWell = reshapeVector(userInputs.get_model_constant_double_array("kWell"),
                                                                   num_phases, num_muFields);
         std::vector<std::vector<double>> cmin  = reshapeVector(userInputs.get_model_constant_double_array("cmin"),
                                                                   num_phases, num_muFields);
+        
+        // Model Parameters
+        double sigma  = userInputs.get_model_constant_double("sigma");
+        double l_gb   = userInputs.get_model_constant_double("l_gb");
         double Va     = userInputs.get_model_constant_double("Va");
         double L      = userInputs.get_model_constant_double("L");
-        double l0     = userInputs.get_model_constant_double("l0");
-        double l_gb   = userInputs.get_model_constant_double("l_gb");
-        double sigma  = userInputs.get_model_constant_double("sigma");
-        double m0_dim = 6.0*sigma/l_gb;
-        double m0     = 1.0;
-        double kappa  = (1.0/8.0)*(l_gb*l_gb)/(l0*l0);
-        double gamma  = userInputs.get_model_constant_double("gamma");
         std::vector<double> D = userInputs.get_model_constant_double_array("D");
-        std::vector<int> phase_index = get_phase_index(num_phases, num_ops);
 
-        const std::string nuc_phase = userInputs.get_model_constant_string("nuc_phase");
+        double m0;
+        double kappa;
+        double gamma  = userInputs.get_model_constant_double("gamma");
+        
+        // Nucleation
         double k1 = 0;
         double k2 = 0;
-        double tau = 0;
         double nuc_force = 0;
+        const std::string nuc_phase = userInputs.get_model_constant_string("nuc_phase");
         bool using_nucleation = false;
-        std::vector<double> c0 = userInputs.get_model_constant_double_array("c0");
-        // std::vector<bool> allowed_to_nucleate = std::vector<bool>(num_phases, false);
-        // std::vector<bool> allowed_to_nucleate = userInputs.get_model_constant_bool_array("allowed_to_nucleate");
-        // std::unordered_map<unsigned int, std::vector<unsigned int>> ops_of_phase;
-        std::vector<std::string> phase_names = userInputs.get_model_constant_string_array("phase_names");
 
-        //Declaring random number generator (Type std::mt19937_64)
-         engine rng;
-         //Declaring distribution (Type std::uniform_real_distribution<double>)
-         distribution dist;
+        // Initial compositions if applicable
+        std::vector<double> c0 = userInputs.get_model_constant_double_array("c0");
+        
+
+        // Declaring random number generator (Type std::mt19937_64)
+        engine rng;
+        // Declaring distribution (Type std::uniform_real_distribution<double>)
+        distribution dist;
 	// ================================================================
 
 };
