@@ -190,6 +190,15 @@ set Model constant num_phases = 3, INT
 # Number of species present (including solvent/matrix)
 set Model constant num_comps = 2, INT
 
+# Length scale (m)
+set Model constant l0 = 1.0, DOUBLE
+
+# Energy scale (J/m^3)
+set Model constant E0 = 40.0, DOUBLE
+
+# Time scale (s)
+set Model constant tau0 = 1.0, DOUBLE
+
 # Free energy well minima
 set Model constant fWell = 6.0, -0.0, -0.0, DOUBLE ARRAY
 
@@ -208,7 +217,7 @@ set Model constant kWell = 60.0,  60.0,  60.0, DOUBLE ARRAY
 set Model constant cmin = 0.50,  0.95,  0.05,  DOUBLE ARRAY
 
 # Grain Mobility
-set Model constant L = 10.0, DOUBLE
+set Model constant L = 0.25, DOUBLE
 
 # Interface term
 set Model constant gamma = 1.5, DOUBLE
@@ -219,10 +228,7 @@ set Model constant l_gb = 0.1, DOUBLE
 # Interface energy (J/m^3)
 set Model constant sigma = 0.666, DOUBLE
 
-# Length scale (m)
-set Model constant l0 = 1.0, DOUBLE
-
-# Component Mobility
+# Component Diffusivity
 set Model constant D = 0.03, 0.03, 0.03, DOUBLE ARRAY
 
 # Volume Scale
@@ -243,7 +249,7 @@ set Model constant nuc_phase = ALPHA, STRING
 set Model constant k1 = 50000.0, DOUBLE
 
 # Nucleation constant 2
-set Model constant k2 = 2.8, DOUBLE
+set Model constant k2 = 96.0, DOUBLE
 
 # Incubation time before nucleation
 set Model constant tau = 0.1, DOUBLE
