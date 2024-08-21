@@ -22,7 +22,7 @@ set Subdivisions X = 1
 set Subdivisions Y = 1
 #set Subdivisions Z = 3
 
-set Refine factor = 8
+set Refine factor = 7
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
 set Element degree = 1
@@ -37,7 +37,7 @@ set Mesh adaptivity = true
 # When adaptive meshing is enabled, the refine factor set in the block above is
 # only used to generate the first pass of the mesh as the initial conditions are
 # applied. It should be set somewhere between the max and min levels below.
-set Max refinement level = 8
+set Max refinement level = 7
 set Min refinement level = 3
 
 # Set the number of time steps between remeshing operations
@@ -115,15 +115,13 @@ set Number of time steps = 200000
 # PERIODIC, NATURAL, PERIODIC, NATURAL
 # PERIODIC, PERIODIC, NATURAL, NATURAL
 
-set Boundary condition for variable n0 =  PERIODIC
-set Boundary condition for variable n1 =  PERIODIC
-set Boundary condition for variable n2 =  PERIODIC
-
-set Boundary condition for variable dndt0 =  PERIODIC
-set Boundary condition for variable dndt1 =  PERIODIC
-set Boundary condition for variable dndt2 =  PERIODIC
-
-set Boundary condition for variable mu0 =  PERIODIC
+set Boundary condition for variable n0 =  NATURAL
+set Boundary condition for variable n1 =  NATURAL
+set Boundary condition for variable n2 =  NATURAL
+set Boundary condition for variable dndt0 =  NATURAL
+set Boundary condition for variable dndt1 =  NATURAL
+set Boundary condition for variable dndt2 =  NATURAL
+set Boundary condition for variable mu0 =  NATURAL
 
 
 # =================================================================================
@@ -175,13 +173,13 @@ set Model constant num_ops = 3, INT
 set Model constant set_ids_by = NAME, STRING
 
 # phase names by at each phase index. Size num_phases
-set Model constant phase_names = LIQUID, ALPHA, BETA, STRING ARRAY
+set Model constant phase_names = LIQUID, FCC_A1_0, AL2CU_1, STRING ARRAY
 
 # phase_id for each parameter. Size num_ops
 # set Model constant phase_id = 0, 1, 2, INT ARRAY
 
 # phase_id for each parameter. Size num_ops
-set Model constant phase_id = LIQUID, ALPHA, BETA, STRING ARRAY
+set Model constant phase_id = LIQUID, FCC_A1_0, AL2CU_1, STRING ARRAY
 # =================================================================================
 
 # Number of Phases possible in this model
@@ -191,51 +189,51 @@ set Model constant num_phases = 3, INT
 set Model constant num_comps = 2, INT
 
 # Length scale (m)
-set Model constant l0 = 1.0, DOUBLE
+set Model constant l0 = 8e-8, DOUBLE
 
 # Energy scale (J/m^3)
-set Model constant E0 = 40.0, DOUBLE
+set Model constant E0 = 2.9e9, DOUBLE
 
 # Time scale (s)
-set Model constant tau0 = 1.0, DOUBLE
+set Model constant tau0 = 8e-9, DOUBLE
 
 # Free energy well minima
-set Model constant fWell = 6.0, -0.0, -0.0, DOUBLE ARRAY
+set Model constant fWell = 7.675e+02, -1.664e-05, 3.278e-04, DOUBLE ARRAY
 
 # Free energy well curvatures
     # Has size num_phases * (num_comps-1)
     # Written in order of phase, component
     # [phase1-comp1, phase1-comp2, phase1-comp3, ... , phase1-compN,
     #  phase2-comp1, phase2-comp2, phase2-comp3, ... , phase2-compN, ...]
-set Model constant kWell = 60.0,  60.0,  60.0, DOUBLE ARRAY
+set Model constant kWell = 7.477e+04, 2.953e+05, 5.472e+05, DOUBLE ARRAY
 
 # Free energy well composition minima
     # Has size num_phases * (num_comps-1)
     # Written in order of phase, component
     # [phase1-comp1, phase1-comp2, phase1-comp3, ... , phase1-compN,
     #  phase2-comp1, phase2-comp2, phase2-comp3, ... , phase2-compN, ...]
-set Model constant cmin = 0.50,  0.95,  0.05,  DOUBLE ARRAY
+set Model constant cmin = 0.157, 0.016, 0.322, DOUBLE ARRAY
 
 # Grain Mobility
-set Model constant L = 0.25, DOUBLE
+set Model constant L = 2, DOUBLE
 
 # Interface term
 set Model constant gamma = 1.5, DOUBLE
 
 # Interface width (m)
-set Model constant l_gb = 0.1, DOUBLE
+set Model constant l_gb = 8e-9, DOUBLE
 
-# Interface energy (J/m^3)
-set Model constant sigma = 0.666, DOUBLE
+# Interface energy (J/m^2)
+set Model constant sigma = 1.0, DOUBLE
 
 # Component Diffusivity
-set Model constant D = 0.03, 0.03, 0.03, DOUBLE ARRAY
+set Model constant D = 5e-8, 5e-9, 5e-9, DOUBLE ARRAY
 
 # Volume Scale
-set Model constant Va = 1.0, DOUBLE
+set Model constant Va = 1e-5, DOUBLE
 
 # Initial Compositions
-set Model constant c0 = 0.50, 0.0, 0.0, DOUBLE ARRAY
+set Model constant c0 = 0.157, 0.016, 0.322, DOUBLE ARRAY
 
 # =================================================================================
 # Set nucleation parameters
@@ -243,40 +241,43 @@ set Model constant c0 = 0.50, 0.0, 0.0, DOUBLE ARRAY
 
 # Phase to nucleate
 # Nucleation parameters won't be read if this is NONE
-set Model constant nuc_phase = ALPHA, STRING
+set Model constant nuc_phase = LIQUID, STRING
 
 # Nucleation constant 1
-set Model constant k1 = 50000.0, DOUBLE
+set Model constant k1 = 9e26, DOUBLE
 
 # Nucleation constant 2
-set Model constant k2 = 96.0, DOUBLE
+set Model constant k2 = 1.999e9, DOUBLE
 
 # Incubation time before nucleation
 set Model constant tau = 0.1, DOUBLE
 
 # Nucleation force
-set Model constant nuc_force = 500.0, DOUBLE
+set Model constant nuc_force = 100.0, DOUBLE
 
 # =================================================================================
 # Set the nucleation parameters
 # =================================================================================
 
 set Time steps between nucleation attempts = 50
-set Minimum allowed distance between nuclei = 1
-set Order parameter cutoff value = 0.5
+set Minimum allowed distance between nuclei = 0.1
+set Order parameter cutoff value = 0.15
 
-subsection Nucleation parameters: n1
-    set Nucleus semiaxes (x, y, z) = 0.09, 0.09, 0.09
-    set Freeze zone semiaxes (x, y, z) = 0.4, 0.4, 0.4
-    set Nucleus rotation in degrees (x, y, z) = 0, 0, 0
-    set Freeze time following nucleation = 0.002
-    #set Nucleation-free border thickness = 1.0
-end
+#subsection Nucleation parameters: n1
+#    set Nucleus semiaxes (x, y, z) = 0.05, 0.05, 0.50
+#    set Freeze zone semiaxes (x, y, z) = 0.15, 0.15, 0.15
+#    set Nucleus rotation in degrees (x, y, z) = 0, 0, 0
+#    set Freeze time following nucleation = 0.002
+#    #set Nucleation-free border thickness = 1.0
+#end
+#
+#subsection Nucleation parameters: n2
+#    set Nucleus semiaxes (x, y, z) = 0.05, 0.05, 0.05
+#    set Freeze zone semiaxes (x, y, z) = 0.15, 0.15, 0.15
+#    set Nucleus rotation in degrees (x, y, z) = 0, 0, 0
+#    set Freeze time following nucleation = 0.002
+#    #set Nucleation-free border thickness = 1.0
+#end
 
-subsection Nucleation parameters: n2
-    set Nucleus semiaxes (x, y, z) = 0.09, 0.09, 0.09
-    set Freeze zone semiaxes (x, y, z) = 0.4, 0.4, 0.4
-    set Nucleus rotation in degrees (x, y, z) = 0, 0, 0
-    set Freeze time following nucleation = 0.002
-    #set Nucleation-free border thickness = 1.0
-end
+# Particle initial radius
+set Model constant r0 = 0.5, DOUBLE

@@ -20,12 +20,8 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
     double center[3] = {0.5*userInputs.domain_size[0],0.5*userInputs.domain_size[1],0.0*userInputs.domain_size[2]};
     double x = p[0] - center[0];
     double y = p[1] - center[1];
-    double z;
-    if(dim<3){
-      z = 0.0;
-    } else {
-      z = p[2] - center[2];
-    }
+    double z = p[2] - center[2];
+    if(dim<3){z=0;}
     double r2 = x*x+y*y+z*z;
 
     // constant definitions
@@ -33,9 +29,15 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
     double intf = std::sqrt(0.5*m0/kappa);
     std::vector<std::vector<double>> c0  = reshapeVector(userInputs.get_model_constant_double_array("c0"),
                                                                   num_phases, num_muFields);
+    double rad = userInputs.get_model_constant_double("r0");
+
+    // profile for making order parameters
+    double tanh_profile = 0.5*(1.0 - std::tanh(0.5*intf*(y+2.30)));
     
-    // TODO: make order parameters
-    op_vals[0] = 1.0;//liquid
+    // make order parameters
+    op_vals[0] = 1.0 - tanh_profile;//liquid
+    op_vals[1] = 0.5*(1.0 + std::tanh(intf*std::sin(pi*x/rad)*rad/pi))*tanh_profile;
+    op_vals[2] = 0.5*(1.0 - std::tanh(intf*std::sin(pi*x/rad)*rad/pi))*tanh_profile;
 
     // Interpolation fields
     double sum_nsq = 0;
