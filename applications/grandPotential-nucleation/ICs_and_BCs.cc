@@ -35,7 +35,8 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
                                                                   num_phases, num_muFields);
     
     // TODO: make order parameters
-    op_vals[0] = 1.0;//liquid
+    op_vals[0] = 0.5+0.1*(dist(rng)-0.5);//liquid
+    op_vals[1] = 0.5+0.1*(dist(rng)-0.5);//liquid
 
     // Interpolation fields
     double sum_nsq = 0;

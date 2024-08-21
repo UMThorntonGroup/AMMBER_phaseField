@@ -9,7 +9,7 @@
 // domain. Note: this function is not a member of customPDE.
 
 void variableAttributeLoader::loadPostProcessorVariableAttributes(){
-    const unsigned int num_ops{3};
+    const unsigned int num_ops{2};
     const unsigned int num_muFields{1};
     std::string string_valn = "";
     std::string string_valmu = "";

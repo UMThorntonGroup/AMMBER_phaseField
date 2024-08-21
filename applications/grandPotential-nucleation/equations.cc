@@ -14,7 +14,7 @@
 // rate calculations.
 
 void variableAttributeLoader::loadVariableAttributes(){
-    const unsigned int num_ops{3};
+    const unsigned int num_ops{2};
     const unsigned int num_muFields{1};
     std::string string_valn = "";
     std::string string_valdndt = "";
@@ -29,7 +29,7 @@ for (unsigned int var_index=0; var_index<num_ops; var_index++){
         set_variable_name				(var_index,var_name);
     	set_variable_type				(var_index,SCALAR);
     	set_variable_equation_type		(var_index,EXPLICIT_TIME_DEPENDENT);
-        set_allowed_to_nucleate			(var_index, (var_index>0));
+        set_allowed_to_nucleate			(var_index, false);
         set_need_value_nucleation		(var_index, true);
     }
     for (unsigned int var_index=0; var_index<num_muFields; var_index++){
