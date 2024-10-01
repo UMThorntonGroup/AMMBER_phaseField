@@ -52,21 +52,6 @@ public:
   // Map linking the model constant name to its index
   std::unordered_map<std::string, unsigned int> model_constant_name_map;
 
-<<<<<<< HEAD
-	// Methods to access members of 'model_constant', one for each type (since one can't template based on return values)
-	// These are really just wrappers for Boost's 'get' function
-	double 							get_model_constant_double			(const std::string constant_name) const {return boost::get<double>							(model_constants[model_constant_name_map.at(constant_name)]);};
-	int								get_model_constant_int				(const std::string constant_name) const {return boost::get<int>								(model_constants[model_constant_name_map.at(constant_name)]);};
-	bool 							get_model_constant_bool				(const std::string constant_name) const {return boost::get<bool>							(model_constants[model_constant_name_map.at(constant_name)]);};
-	std::string 					get_model_constant_string			(const std::string constant_name) const {return boost::get<std::string>						(model_constants[model_constant_name_map.at(constant_name)]);};
-	std::vector<double> 			get_model_constant_double_array		(const std::string constant_name) const {return boost::get<std::vector<double>>				(model_constants[model_constant_name_map.at(constant_name)]);};
-	std::vector<int> 				get_model_constant_int_array		(const std::string constant_name) const {return boost::get<std::vector<int>>				(model_constants[model_constant_name_map.at(constant_name)]);};
-	std::vector<bool> 				get_model_constant_bool_array		(const std::string constant_name) const {return boost::get<std::vector<bool>>				(model_constants[model_constant_name_map.at(constant_name)]);};
-	std::vector<std::string> 		get_model_constant_string_array		(const std::string constant_name) const {return boost::get<std::vector<std::string>>		(model_constants[model_constant_name_map.at(constant_name)]);};
-	dealii::Tensor<1,dim> 			get_model_constant_rank_1_tensor	(const std::string constant_name) const {return boost::get<dealii::Tensor<1,dim> >			(model_constants[model_constant_name_map.at(constant_name)]);};
-	dealii::Tensor<2,dim> 			get_model_constant_rank_2_tensor	(const std::string constant_name) const {return boost::get<dealii::Tensor<2,dim> >			(model_constants[model_constant_name_map.at(constant_name)]);};
-	dealii::Tensor<2,2*dim-1+dim/3> get_model_constant_elasticity_tensor(const std::string constant_name) const {return boost::get<dealii::Tensor<2,2*dim-1+dim/3> >(model_constants[model_constant_name_map.at(constant_name)]);};
-
   // Methods to access members of 'model_constant', one for each type (since one
   // can't template based on return values) These are really just wrappers for
   // Boost's 'get' function
@@ -227,19 +212,6 @@ public:
   // variable_attributes)
   unsigned int number_of_variables;
 
-	// List of user-defined constants
-  std::vector<boost::variant< double, 
-                              int, 
-                              bool, 
-                              std::string, 
-                              std::vector<double>, 
-                              std::vector<int>, 
-                              std::vector<bool>, 
-                              std::vector<std::string>, 
-                              dealii::Tensor<1,dim>, 
-                              dealii::Tensor<2,dim>, 
-                              dealii::Tensor<2,2*dim-1+dim/3> > > model_constants;
-
   std::vector<std::string> var_name;
   std::vector<fieldType>   var_type;
   std::vector<PDEType>     var_eq_type;
@@ -283,13 +255,17 @@ public:
   std::vector<varBCs<dim>> BC_list;
 
   // List of user-defined constants
-  std::vector<boost::variant<double,
-                             int,
-                             bool,
-                             dealii::Tensor<1, dim>,
-                             dealii::Tensor<2, dim>,
-                             dealii::Tensor<2, 2 * dim - 1 + dim / 3>>>
-    model_constants;
+  std::vector<boost::variant< double, 
+                              int, 
+                              bool, 
+                              std::string, 
+                              std::vector<double>, 
+                              std::vector<int>, 
+                              std::vector<bool>, 
+                              std::vector<std::string>, 
+                              dealii::Tensor<1,dim>, 
+                              dealii::Tensor<2,dim>, 
+                              dealii::Tensor<2,2*dim-1+dim/3> > > model_constants;
 
   // Nucleation parameters
   bool                      nucleation_occurs;
