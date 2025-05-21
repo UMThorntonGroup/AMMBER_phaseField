@@ -1,0 +1,3 @@
+[submodule "phaseField"]
+	path = phaseField
+	url = https://github.com/prisms-center/phaseField
